@@ -1,0 +1,11 @@
+[o2-flp]
+baseurl=https://s3.cern.ch/swift/v1/system-configuration/RPMS/slc9_x86-64/flp-suite-v1.79.0/o2
+enabled=1
+gpgcheck=0
+name=ALICE O2/FLP internal RPMs repo (release)
+
+[o2-flp-3rdparty]
+baseurl=http://s3.cern.ch/swift/v1/system-configuration/RPMS/slc9_x86-64/flp-suite-v1.79.0/3rd-party
+enabled=1
+gpgcheck=0
+name=ALICE O2/FLP 3rd party software and dependencies (release)
