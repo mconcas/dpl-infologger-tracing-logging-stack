@@ -7,6 +7,7 @@ COPY o2-flp.repo /etc/yum.repos.d/o2-flp.repo
 
 RUN dnf install -y \
         "o2-InfoLogger-standalone-${INFOLOGGER_VERSION}" \
+        socat \
     && dnf clean all
 
 # Default config location (matches the InfoLogger convention)
@@ -17,6 +18,7 @@ RUN chmod +x /entrypoint.sh
 
 # 6006 – infoLoggerD clients push messages to the server
 # 6102 – browsers / bridge subscribe to the live message stream
-EXPOSE 6006 6102
+# 6007 – socat bridge: TCP → abstract infoLoggerD socket (for macOS host clients)
+EXPOSE 6006 6102 6007
 
 ENTRYPOINT ["/entrypoint.sh"]

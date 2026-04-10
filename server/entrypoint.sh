@@ -28,8 +28,10 @@ dbName=${DB_NAME:-INFOLOGGER}
 [infoLoggerD]
 serverHost=localhost
 serverPort=6006
+rxSocketPath=/tmp/infologgerD.sock
 
 [client]
+txSocketPath=/tmp/infologgerD.sock
 EOF
 
 # ── Wait for MariaDB to accept connections ────────────────────────────────────
@@ -48,6 +50,14 @@ echo "MariaDB is up."
 echo "Initialising InfoLogger schema..."
 "${ADMINDB}" -z "${CFG}" -c create 2>&1 | grep -v "already exists" || true
 echo "Schema ready."
+
+# ── Start infoLoggerD (file socket) in the background ────────────────────────
+DAEMON=/opt/o2-InfoLogger/bin/o2-infologger-daemon
+"${DAEMON}" -z "file:${CFG}" &
+sleep 1   # let the daemon create the file socket before socat connects
+
+# ── Bridge TCP 6007 → file socket (for macOS host clients via socat) ─────────
+socat TCP-LISTEN:6007,reuseaddr,fork UNIX-CONNECT:/tmp/infologgerD.sock &
 
 # ── Start infoLoggerServer in the foreground ──────────────────────────────────
 exec "${SERVER}" -z "file:${CFG}" -o isInteractive=1
