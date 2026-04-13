@@ -19,11 +19,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
-
   infologger-server:
-    image: infologger-server:v2.10.1
-    platform: linux/amd64
     container_name: infologger-server
+    platform: linux/amd64
+    build:
+      context: infologger-server
+    image: infologger-server
     logging:
       driver: fluentd
       options:
@@ -48,6 +49,19 @@ services:
       DB_BROWSER_USER: infoBrowser
       DB_BROWSER_PASS: ilgbrowser
     restart: unless-stopped
+  o2-stack:
+    container_name: o2-stack
+    platform: linux/amd64
+    build:
+      context: ./o2
+      secrets:
+        - source: github_ssh_key
+    image: o2-stack
 
 volumes:
   mariadb-data:
+
+secrets:
+  github_ssh_key:
+    name: ssh_key
+    file: /Users/nemo/.ssh/id_rsa
