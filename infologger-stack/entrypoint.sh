@@ -2,10 +2,11 @@
 set -euo pipefail
 
 ADMINDB=/opt/o2-InfoLogger/bin/o2-infologger-admindb
+DAEMON=/opt/o2-InfoLogger/bin/o2-infologger-daemon
 SERVER=/opt/o2-InfoLogger/bin/o2-infologger-server
 CFG=/etc/o2.d/infologger/infoLogger.cfg
 
-# ── Write configuration from environment variables ───────────────────────────
+# Write configuration from environment variables
 cat > "${CFG}" <<EOF
 [infoLoggerServer]
 dbHost=${DB_HOST:-mariadb}
@@ -28,13 +29,13 @@ dbName=${DB_NAME:-INFOLOGGER}
 [infoLoggerD]
 serverHost=localhost
 serverPort=6006
-rxSocketPath=/tmp/infologgerD.sock
+rxSocketPath=/tmp/infologger-socket/infologgerD.sock
 
 [client]
-txSocketPath=/tmp/infologgerD.sock
+txSocketPath=/tmp/infologger-socket/infologgerD.sock
 EOF
 
-# ── Wait for MariaDB to accept connections ────────────────────────────────────
+# Wait for MariaDB to accept connections
 echo "Waiting for MariaDB at ${DB_HOST:-mariadb}:${DB_PORT:-3306}..."
 until "${ADMINDB}" -z "${CFG}" -c status >/dev/null 2>&1 \
    || mariadb --host="${DB_HOST:-mariadb}" \
@@ -46,18 +47,16 @@ until "${ADMINDB}" -z "${CFG}" -c status >/dev/null 2>&1 \
 done
 echo "MariaDB is up."
 
-# ── Create the messages table (idempotent: safe to run on every start) ────────
+# Create the messages table (idempotent: safe to run on every start)
 echo "Initialising InfoLogger schema..."
 "${ADMINDB}" -z "${CFG}" -c create 2>&1 | grep -v "already exists" || true
 echo "Schema ready."
 
-# ── Start infoLoggerD (file socket) in the background ────────────────────────
-DAEMON=/opt/o2-InfoLogger/bin/o2-infologger-daemon
+# Start infoLoggerD (and create file socket) in the background
 "${DAEMON}" -z "file:${CFG}" &
-sleep 1   # let the daemon create the file socket before socat connects
+sleep 1
 
-# ── Bridge TCP 6007 → file socket (for macOS host clients via socat) ─────────
-socat TCP-LISTEN:6007,reuseaddr,fork UNIX-CONNECT:/tmp/infologgerD.sock &
+chmod 777 /tmp/infologger-socket/infologgerD.sock
 
-# ── Start infoLoggerServer in the foreground ──────────────────────────────────
+# Start infoLoggerServer in the foreground
 exec "${SERVER}" -z "file:${CFG}" -o isInteractive=1

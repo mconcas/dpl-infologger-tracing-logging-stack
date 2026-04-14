@@ -13,7 +13,7 @@ services:
       MARIADB_DATABASE: INFOLOGGER
     volumes:
       - mariadb-data:/var/lib/mysql
-      - ./infologger/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./infologger-stack/mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 5s
@@ -34,7 +34,8 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
-
+    volumes:
+      - infologger-socket:/tmp/infologger-socket
     ports:
       - "6006:6006"
       - "6007:6007"
@@ -53,13 +54,16 @@ services:
     container_name: o2-stack
     platform: linux/amd64
     build:
-      context: ./o2
+      context: ./o2-stack
       secrets:
         - source: github_ssh_key
     image: o2-stack
+    volumes:
+      - infologger-socket:/tmp/infologger-socket
 
 volumes:
   mariadb-data:
+  infologger-socket:
 
 secrets:
   github_ssh_key:
