@@ -6,4 +6,4 @@ export INFOLOGGER_TRANSPORT="infoLoggerD:///tmp/infologger-socket/infologgerD.so
 export O2_INFOLOGGER_CONFIG=file:/tmp/infologger.cfg
 # export O2_INFOLOGGER_OPTIONS="verbose=1,outputModeFallback=none"
 
-o2-testworkflows-diamond-workflow -b --run --shm-segment-size 20000000 --infologger-severity info
+o2-testworkflows-diamond-workflow -b --run --shm-segment-size 20000000 --infologger-severity info --tracing-backend otlp-grpc://0.0.0.0:4317

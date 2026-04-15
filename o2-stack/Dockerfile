@@ -41,7 +41,7 @@ RUN source ~/.bashrc
 
 RUN cd ~/alice && aliBuild build O2 -d
 
-COPY run-dpl.sh /home/alice/alice/run-dpl.sh
+COPY --chown=alice:alice run-dpl.sh /home/alice/alice/run-dpl.sh
 RUN chmod +x /home/alice/alice/run-dpl.sh
 
-ENTRYPOINT ["./home/alice/alice/run-dpl.sh"]
+ENTRYPOINT ["alienv", "setenv", "O2/latest", "-c", "./home/alice/alice/run-dpl.sh"]
