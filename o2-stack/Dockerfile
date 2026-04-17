@@ -23,11 +23,8 @@ RUN dnf update -y && \
 RUN useradd -m -s /bin/bash alice
 
 USER alice
-RUN mkdir -p ~/.ssh && chmod 700 ~/.ssh && \
-    ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null && \
-    chmod 644 ~/.ssh/known_hosts
-RUN --mount=type=secret,id=github_ssh_key,uid=1000,gid=1000,mode=0600 mkdir -p ~/alice && \
-    cd ~/alice && \
+
+RUN mkdir -p ~/alice && cd ~/alice && \
     export GIT_SSH_COMMAND='ssh -i /run/secrets/github_ssh_key -o IdentitiesOnly=yes' && \
     git clone --branch otel-tracing https://github.com/mconcas/AliceO2.git O2 && \
     git clone --branch master https://github.com/mconcas/alidist.git && \

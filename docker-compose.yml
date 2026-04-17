@@ -57,8 +57,6 @@ services:
     platform: linux/amd64
     build:
       context: ./o2-stack
-      secrets:
-        - source: github_ssh_key
     image: o2-stack
     volumes:
       - infologger-socket:/tmp/infologger-socket
@@ -69,11 +67,6 @@ volumes:
   fluentbit-socket:
     name: observability-bootstrap_fluentbit-socket
     external: true
-
-secrets:
-  github_ssh_key:
-    name: ssh_key
-    file: /Users/nemo/.ssh/id_rsa
 
 networks:
   default:
