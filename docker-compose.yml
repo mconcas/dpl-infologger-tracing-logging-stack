@@ -23,7 +23,7 @@ services:
     container_name: infologger-server
     platform: linux/amd64
     build:
-      context: infologger-server
+      context: ./infologger-stack
     image: infologger-server
     logging:
       driver: fluentd
@@ -36,6 +36,7 @@ services:
         condition: service_healthy
     volumes:
       - infologger-socket:/tmp/infologger-socket
+      - fluentbit-socket:/tmp/fluent-bit-socket
     ports:
       - "6006:6006"
       - "6007:6007"
@@ -50,6 +51,7 @@ services:
       DB_BROWSER_USER: infoBrowser
       DB_BROWSER_PASS: ilgbrowser
     restart: unless-stopped
+
   o2-stack:
     container_name: o2-stack
     platform: linux/amd64
@@ -64,8 +66,16 @@ services:
 volumes:
   mariadb-data:
   infologger-socket:
+  fluentbit-socket:
+    name: observability-bootstrap_fluentbit-socket
+    external: true
 
 secrets:
   github_ssh_key:
     name: ssh_key
     file: /Users/nemo/.ssh/id_rsa
+
+networks:
+  default:
+    name: observability-bootstrap-net
+    external: true

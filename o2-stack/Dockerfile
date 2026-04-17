@@ -26,22 +26,18 @@ USER alice
 RUN mkdir -p ~/.ssh && chmod 700 ~/.ssh && \
     ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null && \
     chmod 644 ~/.ssh/known_hosts
-RUN --mount=type=secret,id=github_ssh_key,uid=1000,gid=1000,mode=0600 mkdir -p ~/alice/alice && \
+RUN --mount=type=secret,id=github_ssh_key,uid=1000,gid=1000,mode=0600 mkdir -p ~/alice && \
     cd ~/alice && \
     export GIT_SSH_COMMAND='ssh -i /run/secrets/github_ssh_key -o IdentitiesOnly=yes' && \
     git clone --branch otel-tracing git@github.com:mconcas/AliceO2.git O2 && \
     git clone --branch master git@github.com:mconcas/alidist.git && \
-    git clone --branch master git@github.com:mconcas/Tracing.git
+    git clone --branch master git@github.com:mconcas/Tracing.git && \
+    git clone --branch traceable-logs git@github.com:mconcas/InfoLogger.git libInfoLogger
 
-# Initialize alibuild shell helper in bashrc
-RUN echo 'export ALIBUILD_WORK_DIR="/home/alice/sw"' >> ~/.bashrc && \
-    echo 'eval "$(alienv shell-helper)"' >> ~/.bashrc
-
-RUN source ~/.bashrc
-
+ENV ALIBUILD_WORK_DIR="/home/alice/sw"
 RUN cd ~/alice && aliBuild build O2 -d
 
 COPY --chown=alice:alice run-dpl.sh /home/alice/alice/run-dpl.sh
 RUN chmod +x /home/alice/alice/run-dpl.sh
 
-ENTRYPOINT ["alienv", "setenv", "O2/latest", "-c", "./home/alice/alice/run-dpl.sh"]
+ENTRYPOINT ["/home/alice/alice/run-dpl.sh"]
