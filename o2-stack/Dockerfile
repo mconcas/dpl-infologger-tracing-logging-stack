@@ -29,10 +29,10 @@ RUN mkdir -p ~/.ssh && chmod 700 ~/.ssh && \
 RUN --mount=type=secret,id=github_ssh_key,uid=1000,gid=1000,mode=0600 mkdir -p ~/alice && \
     cd ~/alice && \
     export GIT_SSH_COMMAND='ssh -i /run/secrets/github_ssh_key -o IdentitiesOnly=yes' && \
-    git clone --branch otel-tracing git@github.com:mconcas/AliceO2.git O2 && \
-    git clone --branch master git@github.com:mconcas/alidist.git && \
-    git clone --branch master git@github.com:mconcas/Tracing.git && \
-    git clone --branch traceable-logs git@github.com:mconcas/InfoLogger.git libInfoLogger
+    git clone --branch otel-tracing https://github.com/mconcas/AliceO2.git O2 && \
+    git clone --branch master https://github.com/mconcas/alidist.git && \
+    git clone --branch master https://github.com/mconcas/Tracing.git && \
+    git clone --branch traceable-logs https://github.com/mconcas/InfoLogger.git libInfoLogger
 
 ENV ALIBUILD_WORK_DIR="/home/alice/sw"
 RUN cd ~/alice && aliBuild build O2 -d
